@@ -1,6 +1,6 @@
 import base64
-logo = base64.b64encode(open('logo.jpg','rb').read()).decode()
-js = '\n'.join(open('src/'+f).read() for f in ['data.js','art.js','game.js','shop.js'])
+logo = base64.b64encode(open('logo.webp','rb').read()).decode()
+js = '\n'.join(open('src/'+f).read() for f in ['data.js','art.js','game.js','story.js','shop.js'])
 open('bundle.js','w').write(js)
 FS_JS = r'''// On phones, ask for full screen on the first tap (Android and iPad allow it; iPhone uses Add to Home Screen instead).
 (function () {
@@ -14,10 +14,33 @@ FS_JS = r'''// On phones, ask for full screen on the first tap (Android and iPad
   document.addEventListener('pointerup', go, { once: true });
 })();
 '''
+SITE = 'https://dmh09962.github.io/noodle-rush/'
+DESC = 'A free, cozy pasta cooking game. Roll the dough, cook for the whole town and grow the little shop Nonna gave you. Plays right in your browser, with no download and no sign-up.'
+LOADER_JS = r'''window.NR_READY = function () {
+  var l = document.getElementById('loader'); if (!l || l.dataset.done) return;
+  l.dataset.done = 1; l.classList.add('done'); setTimeout(function () { l.remove(); }, 600);
+};
+setTimeout(function () { var p = document.querySelector('#loader p'); if (p && !document.getElementById('loader').dataset.done) p.textContent = 'Still loading. If this takes too long, check your connection and refresh the page.'; }, 15000);
+'''
 html = f'''<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Noodle Rush</title>
+<title>Noodle Rush · a cozy pasta cooking game</title>
+<meta name="description" content="{DESC}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Noodle Rush">
+<meta property="og:title" content="Noodle Rush: cook pasta with Nonna">
+<meta property="og:description" content="{DESC}">
+<meta property="og:url" content="{SITE}">
+<meta property="og:image" content="{SITE}og.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Noodle Rush logo with Nonna and a young chef">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Noodle Rush: cook pasta with Nonna">
+<meta name="twitter:description" content="{DESC}">
+<meta name="twitter:image" content="{SITE}og.jpg">
 <meta name="theme-color" content="#07411e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -38,6 +61,15 @@ body {{ background: var(--basil); color: var(--cream); overflow: hidden; -webkit
 #rotate .phone {{ width: 46px; height: 78px; border: 5px solid var(--pasta); border-radius: 10px; animation: turn 1.8s ease-in-out infinite; }}
 @keyframes turn {{ 0%, 30% {{ transform: rotate(0); }} 60%, 100% {{ transform: rotate(-90deg); }} }}
 @media (orientation: portrait) and (pointer: coarse) {{ #rotate {{ display: flex; }} }}
+/* loading screen, shown until the title screen is ready */
+#loader {{ position: fixed; inset: 0; z-index: 15; background: var(--basil); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; transition: opacity .5s ease; font: 800 18px/1.4 Nunito, "Segoe UI", sans-serif; color: #cfe3c9; text-align: center; padding: 20px; }}
+#loader img {{ width: min(520px, 70vw, 80vh); height: auto; }}
+#loader .bar {{ width: min(300px, 60vw); height: 14px; border: 3px solid var(--cream); border-radius: 10px; overflow: hidden; }}
+#loader .bar i {{ display: block; height: 100%; width: 8%; background: var(--pasta); border-radius: 6px; animation: fill 5s cubic-bezier(.2,.7,.3,1) forwards; }}
+#loader.done {{ opacity: 0; pointer-events: none; }}
+#loader.done .bar i {{ width: 100%; animation: none; transition: width .25s; }}
+#loader p {{ margin: 0; max-width: 420px; }}
+@keyframes fill {{ to {{ width: 88%; }} }}
 /* tester feedback card */
 #nr-feedback {{ position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; padding: 12px; -webkit-user-select: text; user-select: text; }}
 #nr-feedback .fb-card {{ background: #fffaee; color: var(--ink); border: 4px solid var(--ink); border-radius: 20px; padding: 18px 22px; width: min(560px, 100%); max-height: 100%; overflow: auto; box-sizing: border-box; font: 700 16px/1.35 Nunito, sans-serif; }}
@@ -65,10 +97,12 @@ body {{ background: var(--basil); color: var(--cream); overflow: hidden; -webkit
 </style>
 <div id="game" aria-label="Noodle Rush game"></div>
 <div id="rotate" role="status"><div class="phone"></div>Turn your phone sideways to play Noodle Rush</div>
+<div id="loader" role="status"><img id="ld-logo" alt="Noodle Rush"><div class="bar"><i></i></div><p>Warming up the kitchen…</p></div>
+<script>window.NOODLE_LOGO = "data:image/webp;base64,{logo}"; document.getElementById('ld-logo').src = window.NOODLE_LOGO;
+{LOADER_JS}</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.80.1/phaser.min.js"></script>
 <script>
 {FS_JS}</script>
-<script>window.NOODLE_LOGO = "data:image/jpeg;base64,{logo}";</script>
 <script>
 {js}
 </script>
@@ -76,4 +110,6 @@ body {{ background: var(--basil); color: var(--cream); overflow: hidden; -webkit
 import os, shutil
 open('index.html','w').write(html.replace('<!--WEBAPP-->', '<link rel="manifest" href="manifest.webmanifest">\n<link rel="apple-touch-icon" href="icon-180.png">\n<link rel="icon" href="icon-192.png">'))
 open('manifest.webmanifest','w').write('{"name":"Noodle Rush","short_name":"Noodle Rush","start_url":"./","display":"fullscreen","orientation":"landscape","background_color":"#07411e","theme_color":"#07411e","icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png"},{"src":"icon-512.png","sizes":"512x512","type":"image/png"}]}')
+os.makedirs('dist', exist_ok=True)
+open('dist/artifact.html','w').write(html.replace('<!--WEBAPP-->\n', ''))
 print(len(html))

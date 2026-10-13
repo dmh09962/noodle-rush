@@ -69,8 +69,8 @@ function expectedCount(day) {
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(SAVE)); } catch (e) {} }
 function friendOf(key) { if (!SAVE.friends[key]) SAVE.friends[key] = { pts: 0, visits: 0 }; return SAVE.friends[key]; }
 const friendLevel = key => Math.min(5, Math.floor(friendOf(key).pts / 2));
-// tips are rounded to the quarter; renovations and a market boost raise them
-const tipQ = v => Math.round(v * 4) / 4;
+// tips are rounded to a whole coin; renovations and a market boost raise them
+const tipQ = v => Math.round(v * 10) / 10;
 const boostToday = id => !!(SAVE.boost && SAVE.boost.day === (SAVE.day || 1) && SAVE.boost.id === id);
 function tipBoost() { const r = RENOVATIONS[(SAVE.renov || 0) - 1]; return (1 + (r ? r.tip : 0)) * (boostToday('oil') ? 1.1 : 1); }
 
@@ -148,7 +148,9 @@ function rng(seed) {
   return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
 }
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-const money = v => '$' + v.toFixed(2);
+// Money is kept in the save as before, and shown as Nonna's gold coins: 10 coins to each old dollar.
+const coinsOf = v => Math.round((v || 0) * 10);
+const money = v => { const n = coinsOf(v); return `${n.toLocaleString('en-US')} coin${n === 1 ? '' : 's'}`; };
 function bandScore(v, band, max, slope) {
   if (v >= band[0] && v <= band[1]) return max;
   const d = v < band[0] ? band[0] - v : v - band[1];
@@ -477,6 +479,17 @@ function drawStar(g, x, y, r, on) {
   g.fillStyle(on ? COL.gold : 0xd9cfb3, 1).fillPoints(pts, true);
   g.lineStyle(2.5, COL.ink, on ? 1 : 0.35).strokePoints(pts, true);
 }
+// a little gold coin with Nonna's star stamped on it
+function coinIcon(scene, x, y, r) {
+  const g = scene.add.graphics();
+  g.fillStyle(0xb8862a, 1).fillCircle(0, 1.5, r);
+  g.fillStyle(COL.gold, 1).fillCircle(0, 0, r);
+  g.lineStyle(Math.max(1.5, r * 0.22), COL.ink, 1).strokeCircle(0, 0, r);
+  const pts = [];
+  for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = (i % 2 ? 0.22 : 0.52) * r; pts.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr }); }
+  g.fillStyle(0xfff1b8, 1).fillPoints(pts, true);
+  return g.setPosition(x, y);
+}
 function drawHeart(g, x, y, r, on) {
   g.fillStyle(on ? 0xe8434f : 0xd9cfb3, 1);
   g.fillCircle(x - r * 0.5, y - r * 0.2, r * 0.55).fillCircle(x + r * 0.5, y - r * 0.2, r * 0.55);
@@ -613,6 +626,8 @@ class TitleScene extends Phaser.Scene {
   constructor() { super('title'); }
   preload() { if (!this.textures.exists('logo')) this.load.image('logo', window.NOODLE_LOGO); }
   create() {
+    if (window.NR_READY) window.NR_READY();
+    this.menu = null;
     this.cameras.main.setBackgroundColor(COL.basil);
     const g = this.add.graphics();
     g.fillStyle(0xffffff, 0.035);
@@ -627,20 +642,44 @@ class TitleScene extends Phaser.Scene {
       this.add.text(1070, 420, `${chef.first} ${chef.last}`, { fontFamily: FD, fontSize: '24px', fontStyle: '800', color: '#f6c453' }).setOrigin(0.5);
     }
     const day = SAVE.day || 1;
-    makeButton(this, W / 2, 452, 340, 64, chef ? `Continue · Day ${day}` : 'Start playing', () => this.scene.start(!chef ? 'chef' : day <= 1 ? 'game' : 'morning'), { size: 28 });
+    makeButton(this, W / 2, 452, 340, 64, chef ? `Continue · Day ${day}` : 'Start playing', () => this.scene.start(!chef ? 'chef' : wantsStory() ? 'story' : day <= 1 ? 'game' : 'morning'), { size: 28 });
     if (chef) {
       makeButton(this, W / 2, 532, 240, 50, 'Change chef', () => this.scene.start('chef'), { fill: COL.basilMid, size: 22 });
-      this.add.text(W / 2, 592, `Savings ${money(SAVE.bank || 0)}`, { fontFamily: FB, fontSize: '19px', fontStyle: '800', color: '#cfe3c9' }).setOrigin(0.5);
-      const reset = this.add.text(W / 2, 640, 'Start over', { fontFamily: FB, fontSize: '16px', fontStyle: '700', color: '#8fb894' }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-      let armed = false;
-      reset.on('pointerdown', () => {
-        if (!armed) { armed = true; reset.setText('Click again to erase all progress').setColor('#f08a7a'); return; }
-        SAVE = freshSave(); writeSave(); this.scene.restart();
-      });
+      const sv = this.add.text(W / 2 + 12, 592, `Savings ${money(SAVE.bank || 0)}`, { fontFamily: FB, fontSize: '19px', fontStyle: '800', color: '#cfe3c9' }).setOrigin(0.5);
+      coinIcon(this, sv.x - sv.width / 2 - 14, 592, 9);
     }
-    this.add.text(W - 16, H - 12, 'Test version 10 · Esc pauses', { fontFamily: FB, fontSize: '14px', color: '#8fb894' }).setOrigin(1, 1);
-    const fb = this.add.text(16, H - 12, 'Send feedback', { fontFamily: FB, fontSize: '17px', fontStyle: '800', color: '#f6c453' }).setOrigin(0, 1).setInteractive({ useHandCursor: true });
-    fb.on('pointerdown', () => { if (window.openFeedback) window.openFeedback(); });
+    else this.add.text(W / 2, 372, 'Cook pasta with Nonna and grow her little shop', { fontFamily: FH, fontSize: '30px', color: '#fbf3e0' }).setOrigin(0.5);
+    this.add.text(W / 2, H - 22, 'Free to play  ·  No sign-up  ·  Your progress saves on this device', { fontFamily: FB, fontSize: '18px', fontStyle: '700', color: '#8fb894' }).setOrigin(0.5);
+    // the small menu, top right: story, sound, feedback, start over
+    const mb = this.add.container(W - 44, 40);
+    const mg = this.add.graphics();
+    mg.fillStyle(0x000000, 0.22).fillRoundedRect(-26, -22, 52, 48, 12).fillStyle(COL.basilMid, 1).fillRoundedRect(-26, -24, 52, 48, 12);
+    mg.lineStyle(3, COL.ink, 0.9).strokeRoundedRect(-26, -24, 52, 48, 12).fillStyle(0xfbf3e0, 1);
+    for (const y of [-11, 0, 11]) mg.fillRoundedRect(-13, y - 2.5, 26, 5, 2.5);
+    mb.add([mg, this.add.zone(0, 0, 60, 56).setInteractive({ useHandCursor: true }).on('pointerdown', () => { sfx('click'); this.openMenu(); })]);
+  }
+  openMenu() {
+    if (this.menu) return;
+    const c = this.add.container(0, 0).setDepth(50); this.menu = c;
+    const close = () => { c.destroy(); this.menu = null; };
+    c.add(this.add.rectangle(0, 0, W, H, 0x000000, 0.55).setOrigin(0).setInteractive().on('pointerdown', close));
+    const rows = [];
+    if (SAVE.chef) rows.push(['Watch the story', () => { this.registry.set('storyReplay', true); this.scene.start('story'); }]);
+    rows.push([SAVE.muted ? 'Sound: off' : 'Sound: on', b => { SAVE.muted = !SAVE.muted; writeSave(); b.setLabel(SAVE.muted ? 'Sound: off' : 'Sound: on'); }]);
+    rows.push(['Send feedback', () => { close(); if (window.openFeedback) window.openFeedback(); }]);
+    let armed = false;
+    if (SAVE.chef) rows.push(['Start over', b => {
+      if (!armed) { armed = true; b.setLabel('Tap again to erase it all').setFill(COL.tomato); return; }
+      SAVE = freshSave(); writeSave(); this.scene.restart();
+    }, 0x8a6a4a]);
+    const pw = 400, ph = 150 + rows.length * 66, x0 = (W - pw) / 2, y0 = (H - ph) / 2;
+    const g = this.add.graphics();
+    g.fillStyle(0x000000, 0.3).fillRoundedRect(x0 + 5, y0 + 7, pw, ph, 22).fillStyle(0xfff6dc, 1).fillRoundedRect(x0, y0, pw, ph, 22).lineStyle(4, COL.ink, 1).strokeRoundedRect(x0, y0, pw, ph, 22);
+    c.add([g, this.add.zone(x0, y0, pw, ph).setOrigin(0).setInteractive()]);
+    c.add(this.add.text(W / 2, y0 + 40, 'Menu', { fontFamily: FD, fontSize: '32px', fontStyle: '800', color: '#b8322a' }).setOrigin(0.5));
+    rows.forEach(([label, cb, fill], i) => { const b = makeButton(this, W / 2, y0 + 102 + i * 66, 300, 52, label, () => cb(b), { fill: fill ?? COL.basilMid, size: 21 }); c.add(b); });
+    c.add(this.add.text(W / 2, y0 + ph - 26, 'Noodle Rush · version 11 · Esc pauses the game', { fontFamily: FB, fontSize: '14px', fontStyle: '700', color: '#8a7a5a' }).setOrigin(0.5));
+    c.add(makeButton(this, x0 + pw - 30, y0 + 30, 40, 40, '✕', close, { fill: COL.tomato, size: 20 }));
   }
 }
 
@@ -673,7 +712,7 @@ class ChefScene extends Phaser.Scene {
       return card;
     });
     this.go = makeButton(this, W / 2, 682, 320, 54, '', () => {
-      SAVE.chef = this.sel; if (!SAVE.day) SAVE.day = 1; writeSave(); this.scene.start(SAVE.day <= 1 ? 'game' : 'morning');
+      SAVE.chef = this.sel; if (!SAVE.day) SAVE.day = 1; writeSave(); this.scene.start(wantsStory() ? 'story' : SAVE.day <= 1 ? 'game' : 'morning');
     }, { size: 24 });
     this.pick(this.sel);
   }
@@ -1943,7 +1982,7 @@ class GameScene extends Phaser.Scene {
     if (d.notes.length) c.add(this.add.text(x0 + 240, y0 + 200 + rows.length * gap - 6, d.notes.slice(0, 3).join(' · '), { fontFamily: FB, fontSize: '14px', fontStyle: '700', color: '#b8322a', wordWrap: { width: 430 } }));
     // tip and friendship
     const tipWord = this.daily ? 'Reward ' : 'Tip ';
-    const tipT = this.add.text(x0 + 240, y0 + 400, tipWord + '$0.00', { fontFamily: FD, fontSize: '30px', fontStyle: '800', color: '#2e7d32' }).setOrigin(0, 0.5);
+    const tipT = this.add.text(x0 + 240, y0 + 400, tipWord + money(0), { fontFamily: FD, fontSize: '30px', fontStyle: '800', color: '#2e7d32' }).setOrigin(0, 0.5);
     c.add(tipT);
     const counter = { v: 0 };
     this.tweens.add({ targets: counter, v: S.tip, duration: 900, delay: 800, onUpdate: () => { if (tipT.active) tipT.setText(tipWord + money(counter.v)); }, onComplete: () => { if (tipT.active) sfx('coin'); } });
@@ -2003,7 +2042,7 @@ class GameScene extends Phaser.Scene {
       if (G.dotdSold >= G.dotdGoal) {
         SAVE.streak = (SAVE.streak || 0) + 1;
         gift = STREAK_GIFT(SAVE.streak);
-        streakMsg = gift ? `A ${SAVE.streak}-day streak! Nonna slipped ${money(gift)} into the register.` : '';
+        streakMsg = gift ? `A ${SAVE.streak}-day streak! I slipped ${money(gift)} into the register.` : '';
       } else { if (SAVE.streak >= 2) streakMsg = `We missed the dish of the day goal, so our ${SAVE.streak}-day streak starts over.`; SAVE.streak = 0; }
     }
     SAVE.bank = Math.round(((SAVE.bank || 0) + G.tips + G.sales - G.spent - G.wage + gift) * 100) / 100;

@@ -215,7 +215,7 @@ const EXTRA_TABLE_XS = [760, 420, 1100, 250, 600, 940, 1180];
 
 // cap: extra customers per day the restaurant can handle once owned. req: needs that upgrade first.
 const UPGRADES = [
-  { id: 'garlic', group: 'kitchen', name: 'Garlic bread oven', price: 30, desc: 'Add garlic bread to the menu. Some customers order a slice on the side, and each one sells for $1.50.' },
+  { id: 'garlic', group: 'kitchen', name: 'Garlic bread oven', price: 30, desc: 'Add garlic bread to the menu. Some customers order a slice on the side, and each one sells for 15 coins.' },
   { id: 'pot3', group: 'kitchen', name: 'Third pasta pot', price: 50, cap: 1, desc: 'Boil three plates of pasta at the same time.' },
   { id: 'fastpot', group: 'kitchen', name: 'Rolling-boil burners', price: 70, cap: 1, desc: 'Hotter burners. Pasta boils about 30% faster.' },
   { id: 'machine', group: 'kitchen', name: 'Electric pasta roller', price: 80, cap: 1, desc: 'Rolls the dough about 70% faster, so each plate takes fewer turns of the crank.' },
@@ -224,8 +224,8 @@ const UPGRADES = [
   { id: 'table3', group: 'room', name: 'Extra table', price: 60, cap: 2, desc: 'Two more seats near the front, so fewer customers stand around waiting.' },
   { id: 'table4', group: 'room', name: 'Fourth table', price: 110, cap: 2, req: 'table3', desc: 'Two more seats. Room for a real crowd.' },
   { id: 'flyers', group: 'room', name: 'Print flyers', price: 10, repeat: true, desc: 'Hand out flyers in the piazza. More customers come in over the next 2 days.' },
-  { id: 'cook', group: 'staff', name: 'Hire Rocco, line cook', price: 90, cap: 2, wage: COOK_WAGE, desc: 'Rocco watches the pots and drains every pasta right when it is al dente. He earns $5 a day.' },
-  { id: 'baker', group: 'staff', name: 'Hire Zia Pina, oven master', price: 120, cap: 1, req: 'garlic', wage: BAKER_WAGE, desc: 'Zia Pina slides every garlic bread into the oven with her pizza peel and pulls it out golden. She earns $4 a day.' },
+  { id: 'cook', group: 'staff', name: 'Hire Rocco, line cook', price: 90, cap: 2, wage: COOK_WAGE, desc: 'Rocco watches the pots and drains every pasta right when it is al dente. He earns 50 coins a day.' },
+  { id: 'baker', group: 'staff', name: 'Hire Zia Pina, oven master', price: 120, cap: 1, req: 'garlic', wage: BAKER_WAGE, desc: 'Zia Pina slides every garlic bread into the oven with her pizza peel and pulls it out golden. She earns 40 coins a day.' },
   { id: 'register2', group: 'staff', name: 'Second register', price: 150, cap: 3, desc: 'Your cousin Matteo runs a second register. When someone waits at the counter, he takes their order for you.' },
 ];
 
@@ -511,7 +511,7 @@ const TOMATO_SAUCES = ['marinara', 'aglione', 'ragu', 'amatriciana', 'puttanesca
 
 // Nonna's little sister orders the Daily Dish: one plate, the same for every player on the same date.
 const DAILY_EPOCH = '2026-10-13';
-const DAILY_STAR = 1;                     // dollars per star
+const DAILY_STAR = 1;                     // per star: 10 coins
 const ZIA_LELLA = { name: 'Zia Lella', short: 'Zia Lella', bio: "Nonna's little sister, visiting from Sorrento", patience: 1.3, breadLike: 0, visitor: true, daily: true,
   look: { skin: '#f0c9a8', hair: '#a9a9a9', hairStyle: 'curly', old: true, glasses: true, hat: 'paglietta', shirt: '#f2c23a', longSleeve: true, scarf: '#2f5ea8', pants: '#3a3a40', shoes: '#7d4a26' },
   order: { shape: 'spaghetti', sauce: 'marinara', toppings: [] },

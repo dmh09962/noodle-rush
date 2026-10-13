@@ -661,7 +661,7 @@ function counterCanvas() {
   rrPath(ctx, 34, 20, 86, 50, 8); fs(ctx, '#2f7d6f');
   rrPath(ctx, 44, 4, 66, 22, 5); fs(ctx, '#21564d');
   rrPath(ctx, 50, 8, 54, 14, 3); fs(ctx, '#bfe8c9', 2);
-  ctx.fillStyle = '#1d3d36'; ctx.font = '800 12px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('$ 0.00', 77, 15);
+  ctx.fillStyle = '#1d3d36'; ctx.font = '800 12px Nunito, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('0', 77, 15);
   ctx.fillStyle = '#e8f1ec'; for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) { rrPath(ctx, 48 + i * 20, 34 + j * 15, 14, 10, 3); ctx.fill(); }
   // bell
   ell(ctx, 300, 66, 20, 5); fs(ctx, '#9aa1a8', 2.5);
@@ -1179,5 +1179,98 @@ function produceCanvas(id) {
   else if (id === 'parsley') { ctx.strokeStyle = '#4f8a2a'; ctx.lineWidth = 3; for (const tx of [18, 32, 46]) { ctx.beginPath(); ctx.moveTo(32, 60); ctx.lineTo(tx, 24); ctx.stroke(); } for (const [x, y] of [[18, 22], [32, 16], [46, 22], [25, 12], [39, 12]]) { circ(ctx, x, y, 8); fs(ctx, '#2f8a3a', 2); } }
   else if (id === 'tomato') { circ(ctx, 32, 36, 22); fs(ctx, '#e0392a', 3); for (const a of [0, 1.3, 2.6, 3.9, 5.2]) { ell(ctx, 32 + Math.cos(a) * 7, 16 + Math.sin(a) * 4, 6, 3, a); fs(ctx, '#3f8f3a', 1.5); } ctx.fillStyle = 'rgba(255,255,255,0.55)'; ell(ctx, 24, 30, 5, 7, -0.5); ctx.fill(); }
   else if (id === 'garlic') { ctx.beginPath(); ctx.moveTo(32, 8); ctx.quadraticCurveTo(36, 18, 52, 34); ctx.quadraticCurveTo(58, 58, 32, 58); ctx.quadraticCurveTo(6, 58, 12, 34); ctx.quadraticCurveTo(28, 18, 32, 8); ctx.closePath(); fs(ctx, '#f6efe2', 3); ctx.strokeStyle = '#b48ab0'; ctx.lineWidth = 2; for (const dx of [-10, 0, 10]) { ctx.beginPath(); ctx.moveTo(32 + dx * 0.4, 22); ctx.quadraticCurveTo(32 + dx * 1.3, 40, 32 + dx, 56); ctx.stroke(); } }
+  return c;
+}
+
+// ----- the opening story: Nonna's home kitchen and the little shop -----
+function storyKitchenCanvas() {
+  const W = 1280, H = 720, F = 560;
+  const [c, ctx] = mkCanvas(W, H, 1.5);
+  wallStripes(ctx, 0, W, 0, F, styleOf('wall', 'cream'));
+  ctx.fillStyle = '#e8cf9e'; ctx.fillRect(0, F - 120, W, 120);
+  ctx.strokeStyle = 'rgba(125,74,38,0.35)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(0, F - 120); ctx.lineTo(W, F - 120); ctx.stroke();
+  tileFloor(ctx, 0, W, F, H, styleOf('floor', 'terracotta'));
+  ctx.fillStyle = '#7d4a26'; ctx.fillRect(0, 0, W, 14);
+  // window onto the hills
+  rrPath(ctx, 120, 110, 250, 210, 8); fs(ctx, '#7d4a26', 4);
+  const sky = ctx.createLinearGradient(0, 124, 0, 306); sky.addColorStop(0, '#8fd0ee'); sky.addColorStop(1, '#f6e7b8');
+  ctx.save(); rrPath(ctx, 134, 124, 222, 182, 4); ctx.clip(); ctx.fillStyle = sky; ctx.fillRect(134, 124, 222, 182);
+  circ(ctx, 300, 170, 22); ctx.fillStyle = '#ffe48f'; ctx.fill();
+  ctx.fillStyle = '#9cc47a'; ctx.beginPath(); ctx.moveTo(134, 260); ctx.quadraticCurveTo(220, 210, 300, 250); ctx.quadraticCurveTo(340, 236, 356, 244); ctx.lineTo(356, 306); ctx.lineTo(134, 306); ctx.fill();
+  ctx.fillStyle = '#7fb05c'; ctx.beginPath(); ctx.moveTo(134, 290); ctx.quadraticCurveTo(250, 250, 356, 286); ctx.lineTo(356, 306); ctx.lineTo(134, 306); ctx.fill();
+  ell(ctx, 190, 248, 6, 22); fs(ctx, '#2f6b3a', 2); ell(ctx, 206, 254, 5, 17); fs(ctx, '#2f6b3a', 2);
+  ctx.restore();
+  ctx.fillStyle = '#7d4a26'; ctx.fillRect(243, 124, 6, 182); ctx.fillRect(134, 212, 222, 6);
+  rrPath(ctx, 108, 316, 274, 16, 4); fs(ctx, '#a8683a', 3);
+  for (const [x, col] of [[150, '#e8434f'], [196, '#f2c23a'], [242, '#e3638f'], [288, '#e8434f'], [334, '#f2c23a']]) { circ(ctx, x, 302, 9); fs(ctx, col, 2); ell(ctx, x - 10, 310, 8, 4, 0.4); fs(ctx, '#3f8f3a', 1.5); }
+  // shelf with jars and a framed photo
+  rrPath(ctx, 470, 190, 300, 14, 3); fs(ctx, '#a8683a', 3);
+  jar(ctx, 510, 190, 34, 48, '#f3d36a'); jar(ctx, 560, 190, 30, 40, '#d9432f'); jar(ctx, 606, 190, 34, 52, '#f6efe2');
+  bottle(ctx, 650, 190, 46, '#8a9a2a'); bottle(ctx, 680, 190, 40, '#5b7fa3');
+  rrPath(ctx, 706, 128, 52, 62, 4); fs(ctx, '#c8963a', 3); rrPath(ctx, 714, 136, 36, 46, 2); fs(ctx, '#e8d9b8', 2);
+  circ(ctx, 732, 154, 9); fs(ctx, '#7d4a26', 1.5); rrPath(ctx, 722, 164, 20, 18, 6); fs(ctx, '#b8322a', 1.5);
+  // hanging garlic and peppers
+  ctx.strokeStyle = '#a07a4a'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(850, 14); ctx.lineTo(850, 120); ctx.moveTo(900, 14); ctx.lineTo(900, 100); ctx.stroke();
+  for (let i = 0; i < 6; i++) { circ(ctx, 844 + (i % 2) * 12, 40 + i * 14, 9); fs(ctx, '#f4ecd8', 2); }
+  for (let i = 0; i < 5; i++) { ell(ctx, 894 + (i % 2) * 12, 36 + i * 13, 6, 11, 0.3); fs(ctx, '#d9432f', 2); }
+  // stove with a pot
+  rrPath(ctx, 960, 330, 250, 230, 10); fs(ctx, '#3a3a40', 4);
+  rrPath(ctx, 980, 420, 210, 110, 6); fs(ctx, '#2a2a2e', 3); rrPath(ctx, 1000, 444, 170, 18, 4); fs(ctx, '#9aa1a8', 2);
+  for (const x of [1000, 1050, 1120, 1170]) { circ(ctx, x, 390, 9); fs(ctx, '#b9bec4', 2); }
+  rrPath(ctx, 1010, 262, 150, 74, 12); fs(ctx, '#b9bec4', 4); rrPath(ctx, 1000, 256, 170, 16, 6); fs(ctx, '#d4d8dc', 3);
+  rrPath(ctx, 990, 280, 22, 10, 4); fs(ctx, '#7d848c', 2); rrPath(ctx, 1158, 280, 22, 10, 4); fs(ctx, '#7d848c', 2);
+  rrPath(ctx, 970, 70, 230, 40, 10); fs(ctx, '#d4d8dc', 3); ctx.fillStyle = '#b9bec4'; ctx.fillRect(1040, 110, 90, 140);
+  ctx.strokeStyle = OUT; ctx.lineWidth = 3; ctx.strokeRect(1040, 110, 90, 140);
+  return c;
+}
+// the kitchen table, drawn in front of the cooks: 760 x 210
+function storyTableCanvas() {
+  const [c, ctx] = mkCanvas(760, 210, 1.5);
+  for (const x of [40, 700]) { rrPath(ctx, x, 60, 26, 150, 6); fs(ctx, '#7d4a26', 3); }
+  rrPath(ctx, 4, 4, 752, 64, 12); fs(ctx, '#c08a52', 4);
+  ctx.fillStyle = 'rgba(255,255,255,0.18)'; ctx.fillRect(16, 14, 728, 8);
+  ctx.strokeStyle = 'rgba(90,50,20,0.35)'; ctx.lineWidth = 2;
+  for (const y of [32, 48]) { ctx.beginPath(); ctx.moveTo(18, y); ctx.lineTo(742, y); ctx.stroke(); }
+  rrPath(ctx, 20, 68, 720, 22, 6); fs(ctx, '#a8683a', 3);
+  return c;
+}
+// the little shop on the piazza; the sign board is left blank for a text label
+function shopFrontCanvas() {
+  const W = 1280, H = 720, G = 600;
+  const [c, ctx] = mkCanvas(W, H, 1.5);
+  const sky = ctx.createLinearGradient(0, 0, 0, 300); sky.addColorStop(0, '#f5b98a'); sky.addColorStop(1, '#fbe3b0');
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, G);
+  // neighbors
+  rrPath(ctx, -20, 120, 300, G - 120, 4); fs(ctx, '#e0a06a', 4);
+  rrPath(ctx, 1000, 90, 300, G - 90, 4); fs(ctx, '#d9c48a', 4);
+  for (const [x, y] of [[60, 180], [170, 180], [60, 330], [170, 330], [1060, 160], [1170, 160], [1060, 320], [1170, 320]]) {
+    rrPath(ctx, x, y, 70, 100, 4); fs(ctx, '#5b7fa3', 3); ctx.fillStyle = '#2f6b3a'; ctx.fillRect(x - 16, y, 14, 100); ctx.fillRect(x + 72, y, 14, 100);
+  }
+  // our building
+  rrPath(ctx, 280, 40, 720, G - 40, 4); fs(ctx, '#f0c987', 4);
+  ctx.fillStyle = '#d9a75a'; ctx.fillRect(284, 40, 712, 22);
+  for (const x of [330, 600, 870]) {
+    rrPath(ctx, x, 90, 90, 120, 4); fs(ctx, '#5b7fa3', 3);
+    ctx.fillStyle = '#1f6b3b'; ctx.fillRect(x - 22, 90, 20, 120); ctx.fillRect(x + 92, 90, 20, 120);
+    rrPath(ctx, x - 8, 210, 106, 18, 4); fs(ctx, '#a8683a', 3);
+    for (let k = 0; k < 5; k++) { circ(ctx, x + 4 + k * 20, 206, 8); fs(ctx, ['#e8434f', '#f2c23a', '#e3638f'][k % 3], 2); }
+  }
+  // sign board and awning
+  rrPath(ctx, 400, 262, 480, 70, 10); fs(ctx, '#5b351b', 4); rrPath(ctx, 410, 270, 460, 54, 6); fs(ctx, '#7d4a26', 2);
+  const aw0 = 350, aw1 = 930, n = 12, sw = (aw1 - aw0) / n;
+  for (let k = 0; k < n; k++) { ctx.fillStyle = k % 2 ? '#fbf3e0' : '#d9432f'; ctx.beginPath(); ctx.moveTo(aw0 + k * sw, 346); ctx.lineTo(aw0 + (k + 1) * sw, 346); ctx.lineTo(aw0 + (k + 1) * sw + 8, 396); ctx.lineTo(aw0 + k * sw + 8, 396); ctx.closePath(); ctx.fill(); }
+  ctx.strokeStyle = OUT; ctx.lineWidth = 3; ctx.strokeRect(aw0, 346, aw1 - aw0 + 8, 50);
+  for (let k = 0; k < n; k++) { ctx.beginPath(); ctx.arc(aw0 + 8 + (k + 0.5) * sw, 396, sw / 2, 0, Math.PI); ctx.fillStyle = k % 2 ? '#fbf3e0' : '#d9432f'; ctx.fill(); ctx.stroke(); }
+  // shop window and door
+  rrPath(ctx, 340, 430, 230, 160, 6); fs(ctx, '#a8683a', 4); rrPath(ctx, 352, 442, 206, 136, 4); fs(ctx, '#bfe0ec', 2);
+  rrPath(ctx, 710, 430, 230, 160, 6); fs(ctx, '#a8683a', 4); rrPath(ctx, 722, 442, 206, 136, 4); fs(ctx, '#bfe0ec', 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.45)'; for (const x of [370, 740]) { ctx.beginPath(); ctx.moveTo(x, 560); ctx.lineTo(x + 50, 450); ctx.lineTo(x + 74, 450); ctx.lineTo(x + 24, 560); ctx.fill(); }
+  rrPath(ctx, 588, 410, 104, 190, 8); fs(ctx, '#5b351b', 4); rrPath(ctx, 600, 424, 80, 80, 4); fs(ctx, '#bfe0ec', 2);
+  circ(ctx, 672, 520, 6); fs(ctx, '#e6b84a', 2);
+  // cobblestones
+  ctx.fillStyle = '#b9ab92'; ctx.fillRect(0, G, W, H - G);
+  ctx.strokeStyle = 'rgba(60,40,20,0.3)'; ctx.lineWidth = 2;
+  for (let r = 0; r < 5; r++) for (let k = 0; k < 24; k++) { ell(ctx, k * 56 + (r % 2) * 28, G + 14 + r * 26, 24, 10); ctx.stroke(); }
+  ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(0, G, W, 8);
   return c;
 }

@@ -81,9 +81,10 @@ function drawDoughBall(g, x, y, r) {
   g.fillStyle(0xffffff, 0.35).fillEllipse(x - r * 0.35, y - r * 0.3, r * 0.7, r * 0.35);
 }
 function drawPriceTag(scene, parent, x, y, price, ok) {
-  const t = label(scene, x, y, '$' + price, 15, '#2b1a10', { font: FD }).setOrigin(1, 0);
-  t.setBackgroundColor(ok ? '#f6c453' : '#e2d6bc').setPadding(6, 0, 6, 0);
+  const t = label(scene, x, y, coinsOf(price).toLocaleString('en-US'), 15, '#2b1a10', { font: FD }).setOrigin(1, 0);
+  t.setBackgroundColor(ok ? '#f6c453' : '#e2d6bc').setPadding(24, 0, 6, 0);
   parent.add(t);
+  parent.add(coinIcon(scene, x - t.width + 13, y + t.height / 2, 7));
   return t;
 }
 
@@ -1270,7 +1271,7 @@ function feedbackReport(f) {
   const recent = (st.history || []).slice(-5).map(h => `D${h.day}: ${h.served}/${h.crowd} served, ${h.left} left, ${h.avg}★, ${money(h.tips)} tips, special ${h.dotd}`);
   const dev = `${/iPhone|iPad|Android/i.test(navigator.userAgent) ? 'phone/tablet' : 'computer'}, ${window.innerWidth}x${window.innerHeight}`;
   const rd = st.realDays || [], v = SAVE.visit || {}, dl = SAVE.daily;
-  return ['Noodle Rush feedback (test v10)',
+  return ['Noodle Rush feedback (v11)',
     `Fun: ${f.fun || '?'}/5 · Keep playing: ${f.again || '?'}`,
     `Liked: ${(f.liked || '').trim() || '-'}`,
     `Confusing or annoying: ${(f.confusing || '').trim() || '-'}`,
@@ -1341,7 +1342,7 @@ function startGame() {
     type: Phaser.AUTO, parent: 'game', width: W, height: H, backgroundColor: '#07411e',
     scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
     input: { activePointers: 2 },
-    scene: [TitleScene, ChefScene, GameScene, MorningScene, DecorateScene, GardenScene],
+    scene: [TitleScene, ChefScene, StoryScene, GameScene, MorningScene, DecorateScene, GardenScene],
   });
 }
 preloadFonts().then(startGame);
